@@ -108,5 +108,3 @@ def otsu(image):
 
 
 
-
-
