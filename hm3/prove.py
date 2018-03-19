@@ -5,8 +5,8 @@ import math
 from sklearn.cluster import SpectralClustering
 
 if __name__ == '__main__':
-    modena_img = cv2.imread('modena.jpg', cv2.IMREAD_COLOR)
-    modena_orig = cv2.imread('modena.jpg', cv2.IMREAD_COLOR)
+    modena_img = cv2.imread('/home/fede/PycharmProjects/computer_vision/lab03/img/modena_skyline_07.png', cv2.IMREAD_COLOR)
+    modena_orig = cv2.imread('/home/fede/PycharmProjects/computer_vision/lab03/img/modena_skyline_07.png', cv2.IMREAD_COLOR)
 
     case = 2
     if case == 1:
@@ -16,9 +16,10 @@ if __name__ == '__main__':
     elif case == 2:
 
         modena_img = cv2.cvtColor(modena_img, cv2.COLOR_BGR2GRAY)
+        modena_img = cv2.bilateralFilter(modena_img, 11, 100, 100)
         ret, th1 = cv2.threshold(modena_img, 127, 255, cv2.THRESH_BINARY)
         cv2.imshow('prov', th1)
-        modena_img = cv2.bilateralFilter(th1, 11, 100, 100)
+
         cv2.imshow('before canny', modena_img)
         modena_img = cv2.Canny(modena_img, 200, 240)
 
