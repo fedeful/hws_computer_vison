@@ -27,7 +27,7 @@ def theta(Gx, Gy):
 def sobel():
     print(Sx)
     print(Sy)
-    modena_skyline = cv2.imread('/home/fede/PycharmProjects/computer_vision/lab03/img/modena_skyline_03.png',
+    modena_skyline = cv2.imread('./img/modena_skyline_03.png',
                                 cv2.IMREAD_GRAYSCALE)
     modena_skyline = modena_skyline.astype(dtype=np.float64)
 
@@ -53,7 +53,7 @@ def sobel():
 
 
 def log():
-    LoG = cv2.imread('/home/fede/PycharmProjects/computer_vision/lab03/img/modena_skyline_03.png', cv2.IMREAD_GRAYSCALE)
+    LoG = cv2.imread('./img/modena_skyline_03.png', cv2.IMREAD_GRAYSCALE)
     LoG = LoG.astype(dtype=np.float64)
     LoG = cv2.filter2D(LoG, -1, lap)
     maxLoG = cv2.morphologyEx(LoG, cv2.MORPH_DILATE, np.ones((3, 3)))

@@ -20,32 +20,19 @@ import cv2
 import numpy as np
 
 
-def ghiralndina(imagec, place):
-    # construct the argument parser and parse the arguments
-    # ap = argparse.ArgumentParser()
-    # ap.add_argument("-i", "--image", required=True, help="Path to the image")
-    # args = vars(ap.parse_args())
+def ghir_value(img):
+    if (img[img.shape[0]/2:img.shape[0], :] == 255).sum() >= (img[img.shape[0]/2:img.shape[0], :] == 0).sum():
+        return 255
+    else:
+        return 0
 
-    # load the image and convert it to a floating point data type
-    # image = cv2.imread('/home/federico/PycharmProjects/hws_computer_vison/lab03/img/modena_skyline_02.png',
-    # cv2.IMREAD_COLOR)
-    image = imagec.copy()
-    image = image.astype(np.float64)
 
-    # loop over the number of segments
-    s = []
-    seg = []
-    for numSegments in (80, 90, 100):
-        # apply SLIC and extract (approximately) the supplied number
-        # of segments
-        segments = slic(image, n_segments=numSegments, sigma=5)
-        val = segments[(place)]
-        a = set()
-        tmp = np.where(segments == val)
-        for i in np.arange(0, len(tmp[0])):
-            a.add((tmp[0][i], tmp[1][i]))
-        s.append(a)
-    return s
+def uniform_color_on_image_fkmeans(img):
+    if (img == 255).sum() >= (img == 0).sum():
+        img[img == 0] = 255
+    else:
+        img[img == 255] = 0
+    return img
 
 
 def find_middle(img):
@@ -59,29 +46,6 @@ def find_middle(img):
             return index
 
         index += 1
-
-
-def find_kmeans_middle(img):
-    base = img.shape[0] / 10
-    index = img.shape[0] / 2 - base
-    while True:
-        if index >= img.shape[0]:
-            return -1
-        if img[index - 1, 0] != img[index, 0]:
-            return index
-        index += 1
-
-
-def find_laplacian_middle_form_kmeans(img, start, bsize, th):
-
-    index = start
-    while True:
-        if index >= img.shape[0]:
-            break
-        if img[index] >= th:
-            break
-        index += 1
-    return 0
 
 
 def find_box(img, line_search, box_size):
@@ -104,14 +68,14 @@ def find_box(img, line_search, box_size):
     return -1
 
 
-def kmeans(data,dim=2):
+def kmeans(data, dim=2):
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
     flags = cv2.KMEANS_RANDOM_CENTERS
     compactness, labels, centers = cv2.kmeans(np.array(data, dtype=np.float32), dim, None, criteria, 50, flags)
     return labels
 
 
-def apply_kmeas(img,dim=2, x_flag=True, y_flag=False):
+def apply_kmeas(img, dim=2, x_flag=True, y_flag=False):
 
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -152,15 +116,16 @@ def apply_kmeas(img,dim=2, x_flag=True, y_flag=False):
     return lab.astype(np.uint8)
 
 
-def apply_detec(img_gray):
+def detect_template(img_gray, dn='day', pm=False):
     img2 = img_gray.copy()
-    template = cv2.imread('/home/federico/Desktop/ghird.png', 0)
+    template = cv2.imread('./template/daytemp.png', 0)
+    if dn == 'night':
+        template = cv2.imread('./template/nighttemp.png', 0)
     w, h = template.shape[::-1]
     methods = ['cv2.TM_CCOEFF', 'cv2.TM_CCOEFF_NORMED', 'cv2.TM_CCORR',
                'cv2.TM_CCORR_NORMED', 'cv2.TM_SQDIFF', 'cv2.TM_SQDIFF_NORMED']
 
     dd ={}
-
 
     for meth in methods:
         img = img2.copy()
@@ -181,16 +146,17 @@ def apply_detec(img_gray):
             dd[top_left] = 0
         bottom_right = (top_left[0] + w, top_left[1] + h)
 
-        '''
-        cv2.rectangle(img, top_left, bottom_right, 255, 2)
+        if pm:
+            cv2.rectangle(img, top_left, bottom_right, 255, 2)
 
-        plt.subplot(121), plt.imshow(res, cmap='gray')
-        plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
-        plt.subplot(122), plt.imshow(img, cmap='gray')
-        plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
-        plt.suptitle(meth)
+            plt.subplot(121), plt.imshow(res, cmap='gray')
+            plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
+            plt.subplot(122), plt.imshow(img, cmap='gray')
+            plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
+            plt.suptitle(meth)
 
-        plt.show()'''
+            plt.show()
+
     tl = max(dd.iteritems(), key=operator.itemgetter(1))[0]
     return tl, (tl[0] + w, tl[1] + h)
 
@@ -271,59 +237,80 @@ def class_day_night(path, train_mode=False):
             return 'night'
 
 
-def main(filename, PRINT_MODE=True):
+def main(filename, pm=True):
 
     img_colored = cv2.imread(filename, cv2.IMREAD_COLOR)
     img_hsv = cv2.cvtColor(img_colored, cv2.COLOR_BGR2HSV)
     img_gray = cv2.cvtColor(img_colored, cv2.COLOR_BGR2GRAY)
 
-    if PRINT_MODE:
+    H = img_colored.shape[0]
+    W = img_colored.shape[1]
+
+    if pm:
         cv2.imshow('original color image ', img_colored)
+
+    classdn = class_day_night(filename)
+    if pm:
+        print(classdn)
 
     img_proc = cv2.morphologyEx(img_colored, cv2.MORPH_CLOSE, np.ones((3, 3)))
     img_proc = cv2.bilateralFilter(img_proc, 3, 100, 100)
 
-    if PRINT_MODE:
+    if pm:
         cv2.imshow('morph close and bilateral filter image', img_proc)
 
     first_kmeans = apply_kmeas(img_proc)
 
-    if PRINT_MODE:
+    if pm:
         cv2.imshow('first kmeans', first_kmeans)
 
     mid = find_middle(first_kmeans)
     box = find_box(first_kmeans, mid, (40, 2))
 
-    print(mid, box)
+    if pm:
+        print(mid, box)
 
-    u = img_gray[mid - 190:mid + 150, :]
-    a, b = apply_detec(u)
-    if PRINT_MODE:
-        cv2.imshow('ghir trovata', img_colored[(mid - 190) + a[1]:(mid - 190) + b[1], a[0]:b[0]])
-    ghirt = img_colored[(mid - 190) + a[1]:(mid - 190) + b[1], a[0]:b[0]]
-    ghirt = cv2.morphologyEx(ghirt, cv2.MORPH_CLOSE, np.ones((4, 4)))
-    ghirt = cv2.bilateralFilter(ghirt, 4, 100, 100)
-    edges = cv2.Canny(ghirt, 180, 200)
-    if PRINT_MODE:
-        cv2.imshow('ghir trovatabil', edges)
-    uu = apply_kmeas(ghirt, 2, False, True)
+    ucb = 30
+    first_kmeans[0:mid-ucb, :] = uniform_color_on_image_fkmeans(first_kmeans[0:mid-ucb, :])
+    first_kmeans[mid+ucb:H, :] = uniform_color_on_image_fkmeans(first_kmeans[mid+ucb:H, :])
 
-    if PRINT_MODE:
-        cv2.imshow('kmeans on found image', uu)
+    if pm:
+        cv2.imshow('uniform color after kmeans', first_kmeans)
 
-    a2 = first_kmeans.copy()
+    #find ghirlandina on middle of image
+    upb = 190
+    dob = 150
+    u = img_gray[mid-upb:mid+dob, :]
+    a, b = detect_template(u, classdn)
 
-    realbord = img_colored[mid - 100: mid + 100, :, :]
-    # rb = cv2.morphologyEx(realbord, cv2.MORPH_CLOSE, np.ones((3, 3)))
-    realbord = cv2.bilateralFilter(realbord, 3, 100, 100)
-    # if PRINT_MODE:
-    #    cv2.imshow('box image', a)
-    uu = apply_kmeas(realbord, 2, True)
-    # a,uu = cv2.threshold(cv2.cvtColor(a, cv2.COLOR_BGR2GRAY), 127, 255, cv2.THRESH_BINARY)
+    if pm:
+        cv2.imshow('ghir trovata', img_colored[(mid-upb)+a[1]:(mid-upb)+b[1], a[0]:b[0]])
 
-    # cv2.imshow('kmenas2', uu)
-    first_kmeans[mid - 100: mid + 100, :] = uu
-    cv2.imshow('final2', first_kmeans)
+    ghirt = img_colored[(mid-upb)+a[1]:(mid-upb)+b[1], a[0]:b[0]]
+    #ghirt = cv2.morphologyEx(ghirt, cv2.MORPH_CLOSE, np.ones((4, 4)))
+    #ghirt = cv2.bilateralFilter(ghirt, 4, 100, 100)
+
+    second_kmenas = np.zeros((5, 5))
+    if classdn == 'day':
+        second_kmenas = apply_kmeas(ghirt, 2, False, True)
+    else:
+        second_kmenas = apply_kmeas(ghirt, 2, False, True)
+
+    if pm:
+        cv2.imshow('kmeans on found image', second_kmenas)
+
+    gval = ghir_value(second_kmenas)
+
+    if pm:
+        print(gval)
+
+    for i in np.arange(0, second_kmenas.shape[0]):
+        for j in np.arange(0, second_kmenas.shape[1]):
+            if second_kmenas[i, j] == gval:
+                first_kmeans[(mid-upb)+a[1]+i, a[0]+j] = 128
+
+    if pm:
+        cv2.imshow('final ', first_kmeans)
 
     k = cv2.waitKey(0)
     if k == 'q':
@@ -332,6 +319,6 @@ def main(filename, PRINT_MODE=True):
 
 if __name__ == '__main__':
 
-    print(class_day_night('/home/federico/Desktop/img/modena_skyline_370.png'))
+    main('/home/federico/Desktop/img/modena_skyline_103.png')
 
 

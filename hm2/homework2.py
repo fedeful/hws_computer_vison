@@ -4,7 +4,7 @@ import cv2
 
 
 def contrast_starching():
-    caffe = cv2.imread('/home/fede/PycharmProjects/computer_vision/hm2/img/lowcon.jpg', cv2.IMREAD_COLOR)
+    caffe = cv2.imread('./img/lowcon.jpg', cv2.IMREAD_COLOR)
     eq = np.zeros(caffe.shape, dtype=caffe.dtype)
     eq[:, :, 0] = cv2.equalizeHist(caffe[:, :, 0])
     eq[:, :, 1] = cv2.equalizeHist(caffe[:, :, 1])
@@ -43,7 +43,7 @@ def add_sp_noise_to_image(img, spratio, per_sub_pix, seed=46):
 
 
 def adaptive_threshold(infile, outfile, colored=False):
-    im = cv2.imread('/home/fede/PycharmProjects/computer_vision/lab02/img/sonnet.jpg', cv2.IMREAD_GRAYSCALE)
+    im = cv2.imread('../lab02/img/sonnet.jpg', cv2.IMREAD_GRAYSCALE)
     ret = cv2.adaptiveThreshold(im, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 13, 4)
     cv2.imshow('eq', ret)
     cv2.waitKey(0)
@@ -51,9 +51,9 @@ def adaptive_threshold(infile, outfile, colored=False):
 
 
 if __name__ == '__main__':
-    im = cv2.imread('/home/fede/PycharmProjects/computer_vision/hm2/img/meres.jpg', cv2.IMREAD_COLOR)
+    im = cv2.imread('./img/meres.jpg', cv2.IMREAD_COLOR)
     #im = add_sp_noise_to_image(im,0.5,0.01,465423)
     #im = add_gaussian_noise_to_image(im, 0, 60)
 
 
-    cv2.imwrite('/home/fede/PycharmProjects/computer_vision/hm2/img/megausnoise.jpg', im)
+    cv2.imwrite('./img/megausnoise.jpg', im)

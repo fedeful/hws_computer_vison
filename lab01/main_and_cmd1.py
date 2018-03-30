@@ -45,8 +45,7 @@ def adaptive_thresholding(img, ws, c):
 
 
 if __name__ == '__main__':
-    #prove_con_otzu('/home/fede/PycharmProjects/computer_vision/hm3/modena.jpg')
-    a = cv2.imread('/home/fede/PycharmProjects/computer_vision/lab02/img/sonnet.jpg', cv2.IMREAD_GRAYSCALE)
+    a = cv2.imread('../lab02/img/sonnet.jpg', cv2.IMREAD_GRAYSCALE)
     a = adaptive_thresholding(a, 17, 10)
     cv2.imshow('adaptive thres', a)
 
