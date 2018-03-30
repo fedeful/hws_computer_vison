@@ -237,7 +237,7 @@ def class_day_night(path, train_mode=False):
             return 'night'
 
 
-def main(filename, pm=True):
+def main_app(filename, pm=True):
 
     img_colored = cv2.imread(filename, cv2.IMREAD_COLOR)
     img_hsv = cv2.cvtColor(img_colored, cv2.COLOR_BGR2HSV)
@@ -319,6 +319,6 @@ def main(filename, pm=True):
 
 if __name__ == '__main__':
 
-    main('/home/federico/Desktop/img/modena_skyline_103.png')
+    main_app('/home/federico/Desktop/img/modena_skyline_103.png')
 
 
