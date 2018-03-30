@@ -237,7 +237,7 @@ def class_day_night(path, train_mode=False):
             return 'night'
 
 
-def main_app(filename, pm=True):
+def main_app(filename,dstfile, pm=True):
 
     img_colored = cv2.imread(filename, cv2.IMREAD_COLOR)
     img_hsv = cv2.cvtColor(img_colored, cv2.COLOR_BGR2HSV)
@@ -311,6 +311,8 @@ def main_app(filename, pm=True):
 
     if pm:
         cv2.imshow('final ', first_kmeans)
+
+    cv2.imwrite(dstfile, first_kmeans)
 
     k = cv2.waitKey(0)
     if k == 'q':
