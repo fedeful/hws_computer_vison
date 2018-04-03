@@ -20,7 +20,7 @@ cv2.imshow('ghir2',a)
 hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
 lower_red = np.array([0, 0, 0])
-upper_red = np.array([170, 55, 160])
+upper_red = np.array([255, 50, 160])
 
 #lower_red = np.array([a[:,:,0].min(), a[:,:,1].min(), a[:,:,2].min()])
 #upper_red = np.array([a[:,:,0].max(), a[:,:,1].max(), a[:,:,2].max()])

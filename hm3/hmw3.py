@@ -307,8 +307,9 @@ def main_app(filename,dstfile, pm=True):
     gt = ghirt.copy()
     hsv_g = cv2.cvtColor(ghirt, cv2.COLOR_BGR2HSV)
 
+    #hue sat value
     lower_red = np.array([0, 0, 0])
-    upper_red = np.array([170, 55, 180])
+    upper_red = np.array([255, 70, 160])
 
     mask = cv2.inRange(hsv_g, lower_red, upper_red)
     res = cv2.bitwise_and(gt, gt, mask=mask)
@@ -322,14 +323,18 @@ def main_app(filename,dstfile, pm=True):
         for j in np.arange(0, second_kmenas.shape[1]):
             if classdn == 'day':
                 if second_kmenas[i, j] == gval:
-                    #if not np.array_equal([0, 0, 0], bff[i, j, :]):
-                    first_kmeans[(mid-upb)+a[1]+i, a[0]+j] = 128
+                    if not np.array_equal([0, 0, 0], bff[i, j, :]):
+                        first_kmeans[(mid-upb)+a[1]+i, a[0]+j] = 128
             else:
                 if second_kmenas[i, j] == gval:
                     first_kmeans[(mid-upb)+a[1]+i, a[0]+j] = 128
 
     if pm:
         cv2.imshow('final ', first_kmeans)
+
+    if True:
+        first_kmeans = cv2.dilate(first_kmeans, None, iterations=2)
+        first_kmeans = cv2.erode(first_kmeans, None, iterations=2)
 
     cv2.imwrite(dstfile, first_kmeans)
 
