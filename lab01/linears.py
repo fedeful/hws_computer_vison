@@ -119,10 +119,16 @@ def contrast_stretching(img, new_max, new_min):
         for i in np.arange(0, img.shape[0]):
             for j in np.arange(0, img.shape[1]):
                 pin = img[i, j, k]
-                pin = pin - mi
-                pout = float(pin)*(float(new_max-new_min)/float(ma-mi))
+                pin = float(pin) - mi
+                pout = float(pin)*(float(new_max)-new_min)/(float(ma)-mi)
+                pout += new_min
                 print(pout)
-                img[i, j, k] = np.uint8(pout)
+                if pout < 0:
+                    img[i, j, k] = 0
+                elif pout > 255:
+                    img[i, j, k] = 255
+                else:
+                    img[i, j, k] = np.uint8(pout)
 
     return img
 
