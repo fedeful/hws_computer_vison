@@ -303,48 +303,35 @@ def main_app(filename,dstfile, pm=True):
 
     if pm:
         print(gval)
-    '''
-    hsv = cv2.cvtColor(ghirt, cv2.COLOR_BGR2HSV)
+
+    gt = ghirt.copy()
+    hsv_g = cv2.cvtColor(ghirt, cv2.COLOR_BGR2HSV)
 
     lower_red = np.array([0, 0, 0])
-    upper_red = np.array([170, 50, 174])
+    upper_red = np.array([170, 55, 180])
 
-    #lower_red = np.array([0, 70, 50])
-    #upper_red = np.array([15, 255, 255])
+    mask = cv2.inRange(hsv_g, lower_red, upper_red)
+    res = cv2.bitwise_and(gt, gt, mask=mask)
 
-    mask = cv2.inRange(hsv, lower_red, upper_red)
-    res = cv2.bitwise_and(ghirt, ghirt, mask=mask)
-    # blur = cv2.Filter(res,(3,3),0)
-    closing = cv2.morphologyEx(res, cv2.MORPH_CLOSE, (7, 7))
+    closing = cv2.dilate(res, None, iterations=2)
+    closing = cv2.erode(closing, None, iterations=3)
+
     bff = cv2.bilateralFilter(closing, 4, 70, 70)
-    #cv2.imshow('prova', res)
-    #cv2.imshow('prova2', bff)'''
 
     for i in np.arange(0, second_kmenas.shape[0]):
         for j in np.arange(0, second_kmenas.shape[1]):
-            #if not np.array_equal(bff[i, j, :], [0, 0, 0]):
-            if second_kmenas[i, j] == gval:
-                first_kmeans[(mid-upb)+a[1]+i, a[0]+j] = 128
+            if classdn == 'day':
+                if second_kmenas[i, j] == gval:
+                    #if not np.array_equal([0, 0, 0], bff[i, j, :]):
+                    first_kmeans[(mid-upb)+a[1]+i, a[0]+j] = 128
+            else:
+                if second_kmenas[i, j] == gval:
+                    first_kmeans[(mid-upb)+a[1]+i, a[0]+j] = 128
 
     if pm:
         cv2.imshow('final ', first_kmeans)
 
-
-
     cv2.imwrite(dstfile, first_kmeans)
-
-    closing = cv2.morphologyEx(first_kmeans, cv2.MORPH_DILATE, (7, 7))
-    closing = cv2.morphologyEx(closing, cv2.MORPH_DILATE, (7, 7))
-    #cv2.imshow('final1 ', closing)
-    closing = cv2.morphologyEx(closing, cv2.MORPH_DILATE, (7, 7))
-    closing = cv2.morphologyEx(closing, cv2.MORPH_DILATE, (7, 7))
-    closing = cv2.morphologyEx(closing, cv2.MORPH_DILATE, (7, 7))
-    closing = cv2.morphologyEx(closing, cv2.MORPH_ERODE, (7, 7))
-    closing = cv2.morphologyEx(closing, cv2.MORPH_ERODE, (7, 7))
-    closing = cv2.morphologyEx(closing, cv2.MORPH_ERODE, (7, 7))
-    closing = cv2.morphologyEx(closing, cv2.MORPH_ERODE, (7, 7))
-    closing = cv2.morphologyEx(closing, cv2.MORPH_ERODE, (7, 7))
-    #cv2.imshow('final 2', closing)
 
     k = cv2.waitKey(0)
     if k == 'q':
