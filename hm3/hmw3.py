@@ -292,9 +292,21 @@ def main_app(filename,dstfile, pm=True):
 
     second_kmenas = np.zeros((5, 5))
     if classdn == 'day':
+        #tempdil = cv2.dilate(ghirt, None, iterations=1)
+        #temer = cv2.erode(ghirt, None, iterations=2)
         second_kmenas = apply_kmeas(ghirt, 2, False, True)
+        #close = cv2.dilate(second_kmenas, None, iterations=5)
+        #close = cv2.erode(close, None, iterations=5)
+        #cv2.imshow('kmeans day dil', close)
     else:
+        ghirt = cv2.medianBlur(ghirt, 3)
+        ghirt = cv2.medianBlur(ghirt, 3)
+        ghirt = cv2.medianBlur(ghirt, 3)
         second_kmenas = apply_kmeas(ghirt, 2, False, True)
+        #cv2.imshow('kmeans2', second_kmenas)
+        #close = cv2.dilate(second_kmenas, None, iterations=5)
+        #close = cv2.erode(close, None, iterations=5)
+        #cv2.imshow('kmeans night dil', close)
 
     if pm:
         cv2.imshow('kmeans on found image', second_kmenas)
@@ -345,6 +357,6 @@ def main_app(filename,dstfile, pm=True):
 
 if __name__ == '__main__':
 
-    main_app('/home/fede/Desktop/img/modena_skyline_132.png','pippo.png',False)
+    main_app('/home/fede/Desktop/img/modena_skyline_49.png','pippo.png',True)
 
 

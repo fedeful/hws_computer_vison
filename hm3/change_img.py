@@ -10,8 +10,8 @@ chdir('/home/fede/Desktop/Label')
 
 for i in listdir(getcwd()):
     if isfile(i):
-        im =cv2.imread(i,cv2.IMREAD_GRAYSCALE)
+        im =cv2.imread(i, cv2.IMREAD_GRAYSCALE)
         im[im == 0] = 255
         im[im == 1] = 0
         im[im == 2] = 128
-        cv2.imwrite(i,im)
+        cv2.imwrite(i, im)
