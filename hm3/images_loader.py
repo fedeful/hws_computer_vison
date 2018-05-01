@@ -97,4 +97,4 @@ def read_from_file():
 
 
 if __name__ == '__main__':
-    a = files_('/home/federico/Desktop/Train_Label_DIR')
+    a = files_('/home/federico/Desktop/Label')

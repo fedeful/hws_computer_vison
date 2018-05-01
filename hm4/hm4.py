@@ -174,6 +174,44 @@ def a_caso():
     cv2.waitKey(0)
 
 
+def prova():
+    img = cv2.imread('/home/federico/PycharmProjects/hws_computer_vison/lab05/houghf/3.BMP', cv2.IMREAD_COLOR)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+
+    lines = cv2.HoughLines(edges, 2, np.pi / 180,90)
+
+    for i in np.arange(0, len(lines)):
+        for rho, theta in lines[i]:
+            a = np.cos(theta)
+            b = np.sin(theta)
+            x0 = a * rho
+            y0 = b * rho
+            x1 = int(x0 + 1000 * (-b))
+            y1 = int(y0 + 1000 * (a))
+            x2 = int(x0 - 1000 * (-b))
+            y2 = int(y0 - 1000 * (a))
+
+
+            # if (max_x - 50) > x1 > tmp_max:
+            #    tmp_max = x1
+            cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
+    cimg = cv2.imread('/home/federico/PycharmProjects/hws_computer_vison/lab05/houghf/3.BMP', cv2.IMREAD_GRAYSCALE)
+    ret2, th2 = cv2.threshold(cimg, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    cv2.imshow('otsu',th2)
+    circles = cv2.HoughCircles(th2, cv2.HOUGH_GRADIENT, 1, 40, param1=100, param2=10, minRadius=10, maxRadius=40)
+    circles = np.uint16(np.around(circles))
+    for i in circles[0, :]:
+        cv2.circle(img, (i[0], i[1]), i[2], (0, 255, 0), 2)
+        cv2.circle(img, (i[0], i[1]), 2, (0, 0, 255), 3)
+
+    cv2.imshow('cerchi', cimg)
+    cv2.imshow('libro ', img)
+
+    cv2.waitKey(0)
+
+
 if __name__ == '__main__':
-    a_caso()
+    #a_caso()
     #main('image.jpg', 'ciao')
+    prova()
