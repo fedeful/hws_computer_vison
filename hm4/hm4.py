@@ -10,7 +10,7 @@ def find_lines_intersection(m_a, c_a, m_b, c_b):
 
 
 def f_lines_intersection(m_a, c_a, x):
-    return int(m_a*x +c_a)
+    return int(x), int(m_a*x +c_a)
 
 
 def find_line_param(x_a, y_a, x_b, y_b):
@@ -27,6 +27,76 @@ def give_x_from_y(m, c, y):
     return int((y/m)-(c/m))
 
 
+def find_max_for_x(coords, y):
+    max_x = 0
+    max_m = 0
+    max_c = 0
+    for coord in coords:
+        m, c = find_line_param(coord[0][0], coord[0][1], coord[1][0], coord[1][1])
+        if give_x_from_y(m, c, y) > max_x:
+            max_x = give_x_from_y(m, c, y)
+            max_m = m
+            max_c = c
+    return max_m, max_c
+
+
+def find_min_for_x(coords, y):
+    min_x = 1000000
+    min_m = 0
+    min_c = 0
+    for coord in coords:
+        m, c = find_line_param(coord[0][0], coord[0][1], coord[1][0], coord[1][1])
+        if give_x_from_y(m, c, y) < min_x:
+            min_x = give_x_from_y(m, c, y)
+            min_m = m
+            min_c = c
+    return min_m, min_c
+
+
+def find_max_for_y(coords, x):
+    max_y = 0
+    max_m = 0
+    max_c = 0
+    for coord in coords:
+        m, c = find_line_param(coord[0][0], coord[0][1], coord[1][0], coord[1][1])
+        if give_y_from_x(m, c, x) > max_y:
+            max_y = give_y_from_x(m, c, x)
+            max_m = m
+            max_c = c
+    return max_m, max_c
+
+
+def find_max(coords, number):
+    max = 0
+    for coord in coords:
+        if coord[0][number] > max:
+            max = coord[0][number]
+    return max
+
+
+def find_min(coords, number):
+    min = 1000000
+    for coord in coords:
+        if coord[0][number] < min:
+            min = coord[0][number]
+    return min
+
+
+
+def find_min_for_y(coords, x):
+    min_y = 1000000
+    min_m = 0
+    min_c = 0
+    for coord in coords:
+        m, c = find_line_param(coord[0][0], coord[0][1], coord[1][0], coord[1][1])
+        if give_y_from_x(m, c, x) < min_y:
+            min_y = give_y_from_x(m, c, x)
+            min_m = m
+            min_c = c
+    return min_m, min_c
+
+
+
 def get_lines_params(edges, theta, rho):
     coord = []
     lines = cv2.HoughLines(edges, 1, np.pi / theta, rho)
@@ -41,6 +111,23 @@ def get_lines_params(edges, theta, rho):
             x2 = int(x0 - 1000 * (-b))
             y2 = int(y0 - 1000 * (a))
             coord.append((x1, y1, x2, y2))
+    return coord
+
+
+def get_lines_coords(edges, pix_pre, deg_pre, accumulator, min_theta=0, max_theta=0):
+    coord = []
+    lines = cv2.HoughLines(edges, pix_pre, np.pi / deg_pre, accumulator, min_theta=min_theta, max_theta=max_theta)
+    for i in np.arange(0, len(lines)):
+        for rho, theta in lines[i]:
+            a = np.cos(theta)
+            b = np.sin(theta)
+            x0 = a * rho
+            y0 = b * rho
+            x1 = int(x0 + 1000 * (-b))
+            y1 = int(y0 + 1000 * a)
+            x2 = int(x0 - 1000 * (-b))
+            y2 = int(y0 - 1000 * a)
+            coord.append([(x1, y1), (x2, y2)])
     return coord
 
 
@@ -174,12 +261,167 @@ def a_caso():
     cv2.waitKey(0)
 
 
-def prova():
-    img = cv2.imread('/home/federico/PycharmProjects/hws_computer_vison/lab05/houghf/3.BMP', cv2.IMREAD_COLOR)
+def dief_ing():
+    img = cv2.imread('./dief.jpg',)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 50, 150, apertureSize=3)
 
-    lines = cv2.HoughLines(edges, 2, np.pi / 180,90)
+    coords_1 = get_lines_coords(edges, 1, 180, 140, np.pi/2, 1.8*np.pi)
+    coords_2 = get_lines_coords(edges, 1, 180, 40, 0, np.pi/180)
+
+    min_orizz = find_min_for_y(coords_1, 0)
+    max_orizz = find_max_for_y(coords_1, 0)
+
+    x_min = find_min(coords_2, 0)
+    x_max = find_max(coords_2, 0)
+
+    print('warp coords')
+    lh = f_lines_intersection(min_orizz[0], min_orizz[1], x_min)
+    print(lh)
+
+    ll = f_lines_intersection(max_orizz[0], max_orizz[1], x_min)
+    print(ll)
+
+    rh = f_lines_intersection(min_orizz[0], min_orizz[1], x_max)
+    print(rh)
+
+    rl = f_lines_intersection(max_orizz[0], max_orizz[1], x_max)
+    print(rl)
+
+    dst_dim = (380,200)
+    h, status = cv2.findHomography(np.array([[lh[0], lh[1]], [ll[0], ll[1]], [rh[0], rh[1]], [rl[0], rl[1]]]),
+                                   np.array([[0, 0], [0, dst_dim[1]], [dst_dim[0], 0], [dst_dim[0], dst_dim[1]]]))
+
+    im_dst = cv2.warpPerspective(img, h, dst_dim)
+    cv2.imshow('dief warpato ', im_dst)
+
+    ####### PARTE DUE #####
+
+    gray = cv2.cvtColor(im_dst, cv2.COLOR_BGR2GRAY)
+    edges = cv2.Canny(gray, 80, 150, apertureSize=3)
+
+    coords_1 = get_lines_coords(edges, 1, 90, 110, np.pi / 2-0.1,  np.pi/2+0.1)
+
+    edges = cv2.Canny(gray, 120, 180, apertureSize=3)
+    coords_2 = get_lines_coords(edges, 1, 180, 70, 0, np.pi /180)
+
+    edges = cv2.Canny(gray, 50, 120, apertureSize=3)
+    coords_3 = get_lines_coords(edges, 2, 180, 70, 0, np.pi / 180)
+
+    x_max = find_max(coords_3, 0)
+    x_middle_1 = find_max(coords_2, 0)
+    x_middle_2 = find_min(coords_2, 0)
+    x_middle_3 = x_middle_2/3
+    x_min = 0
+
+    y_max = find_max(coords_1, 1)
+    y_min = find_min(coords_1[1:], 1)
+    y_middle = (y_max + y_min)/2
+
+    print(x_max, x_middle_1, x_middle_2, x_middle_3, x_min)
+    print(y_max, y_middle, y_min)
+
+    print('meccaninca')
+    mlh = (x_middle_3, y_min)
+    print(mlh)
+    mll = (x_middle_3, y_middle)
+    print(mll)
+    mrh = (x_max, y_min)
+    print(mrh)
+    mrl = (x_max, y_middle)
+    print(mrl)
+
+    print('civile')
+    clh = (x_middle_1, y_middle)
+    print(clh)
+    cll = (x_middle_1, y_max)
+    print(cll)
+    crh = (x_max, y_middle)
+    print(crh)
+    crl = (x_max, y_max)
+    print(crl)
+
+    print('informatica')
+    ilh = (0, y_min)
+    print(ilh)
+    ill = (0, y_max)
+    print(ill)
+    imh = (x_middle_3, y_min)
+    print(imh)
+    iml = (x_middle_3, y_middle)
+    print(iml)
+    irh = (x_middle_2, y_middle)
+    print(irh)
+    irl = (x_middle_2, y_max)
+    print(irl)
+
+    civ = cv2.imread('./CIV.png', cv2.IMREAD_COLOR)
+
+    h, status = cv2.findHomography(np.array([[0, 0],  [civ.shape[1], 0],[0, civ.shape[0]], [civ.shape[1], civ.shape[0]]]),
+                                   np.array([[clh[0], clh[1]+2],  [crh[0], crh[1]+2],[cll[0], cll[1]+2], [crl[0], crl[1]+2]]))
+
+    im_dst_civ = cv2.warpPerspective(civ, h, dst_dim)
+
+    im_dst[im_dst_civ[:, :] != [0, 0, 0]] = im_dst_civ[im_dst_civ[:, :] != [0, 0, 0]]
+
+    mec = cv2.imread('./MEC.png', cv2.IMREAD_COLOR)
+
+    h, status = cv2.findHomography(
+        np.array([[0, 0], [0, mec.shape[0]], [mec.shape[1], 0], [mec.shape[1], mec.shape[0]]]),
+        np.array([[mlh[0], mlh[1]-2], [mll[0], mll[1]-2], [mrh[0], mrh[1]-2], [mrl[0], mrl[1]-2]]))
+
+    im_dst_mec = cv2.warpPerspective(mec, h, dst_dim)
+
+    im_dst[im_dst_mec[:, :] != [0, 0, 0]] = im_dst_mec[im_dst_mec[:, :] != [0, 0, 0]]
+
+    inf = cv2.imread('./INF.png', cv2.IMREAD_COLOR)
+
+    h, status = cv2.findHomography(
+        np.array([[0, 0],
+                  [0, inf.shape[0]],
+                  [int(inf.shape[1]/2), 0],
+                  [int(inf.shape[1] / 6), 0],
+                  [inf.shape[1], 0],
+                  [inf.shape[1], inf.shape[0]]]),
+        np.array([[ilh[0], ilh[1] - 2],
+                  [ill[0], ill[1] + 2],
+                  [imh[0], imh[1]-2],
+                  [iml[0], iml[1] - 2],
+                  [irh[0]-2, irh[1] - 2],
+                  [irl[0]-2, irl[1] + 2]]))
+
+    im_dst_inf = cv2.warpPerspective(inf, h, dst_dim)
+    cv2.imshow('inf', im_dst_inf)
+
+    im_dst[im_dst_inf[:, :] != [0, 0, 0]] = im_dst_inf[im_dst_inf[:, :] != [0, 0, 0]]
+
+
+
+    cv2.imshow('finale', im_dst)
+
+    for coord in coords_3:
+        cv2.line(im_dst, coord[0], coord[1], (0, 0, 255), 2)
+    cv2.imshow('dief ', im_dst)
+    cv2.waitKey(0)
+
+
+def prova():
+    img = cv2.imread('/home/fede/PycharmProjects/computer_vision/lab05/houghf/5.BMP', cv2.IMREAD_COLOR)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    ret2, gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    gray = cv2.GaussianBlur(gray,(5,5),0)
+    cv2.imshow('e before', gray)
+    edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+    cv2.imshow('canny', edges)
+
+    kernel = np.ones((5, 5), np.uint8)
+    img_erosion = cv2.erode(gray, kernel, iterations=1)
+    img_dilate = cv2.dilate(gray, kernel, iterations=1)
+    tmp = img_erosion -img_dilate
+    cv2.imshow('erosion', img_erosion -img_dilate)
+
+
+    lines = cv2.HoughLines(edges, 2, np.pi / 180,80)
 
     for i in np.arange(0, len(lines)):
         for rho, theta in lines[i]:
@@ -196,7 +438,7 @@ def prova():
             # if (max_x - 50) > x1 > tmp_max:
             #    tmp_max = x1
             cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
-    cimg = cv2.imread('/home/federico/PycharmProjects/hws_computer_vison/lab05/houghf/3.BMP', cv2.IMREAD_GRAYSCALE)
+    cimg = cv2.imread('/home/fede/PycharmProjects/computer_vision/lab05/houghf/5.BMP', cv2.IMREAD_GRAYSCALE)
     ret2, th2 = cv2.threshold(cimg, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     cv2.imshow('otsu',th2)
     circles = cv2.HoughCircles(th2, cv2.HOUGH_GRADIENT, 1, 40, param1=100, param2=10, minRadius=10, maxRadius=40)
@@ -212,6 +454,7 @@ def prova():
 
 
 if __name__ == '__main__':
+    dief_ing()
     #a_caso()
     #main('image.jpg', 'ciao')
-    prova()
+    #prova()
