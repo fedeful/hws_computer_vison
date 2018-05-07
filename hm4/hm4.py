@@ -263,6 +263,7 @@ def a_caso():
 
 def dief_ing():
     img = cv2.imread('./dief.jpg',)
+    cv2.imshow('dief orig ', img)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 50, 150, apertureSize=3)
 
@@ -379,16 +380,14 @@ def dief_ing():
     h, status = cv2.findHomography(
         np.array([[0, 0],
                   [0, inf.shape[0]],
-                  [int(inf.shape[1]/2), 0],
-                  [int(inf.shape[1] / 6), 0],
                   [inf.shape[1], 0],
+                  [inf.shape[1], int(inf.shape[0]/2)],
                   [inf.shape[1], inf.shape[0]]]),
-        np.array([[ilh[0], ilh[1] - 2],
-                  [ill[0], ill[1] + 2],
-                  [imh[0], imh[1]-2],
-                  [iml[0], iml[1] - 2],
-                  [irh[0]-2, irh[1] - 2],
-                  [irl[0]-2, irl[1] + 2]]))
+        np.array([[ilh[0], ilh[1]],
+                  [ill[0], ill[1]],
+                  [imh[0], imh[1]],
+                  [iml[0], iml[1]],
+                  [irl[0], irl[1]]]))
 
     im_dst_inf = cv2.warpPerspective(inf, h, dst_dim)
     cv2.imshow('inf', im_dst_inf)
