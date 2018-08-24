@@ -83,17 +83,17 @@ def fast_linear_blend(img1, img2, alpha):
     min2 = 0
 
     old_type = img1.dtype
-    if img1.shape[0]>img2.shape[0]:
+    if img1.shape[0] > img2.shape[0]:
         min1 = img2.shape[0]
     else:
         min1 = img1.shape[0]
 
-    if img1.shape[1]>img2.shape[1]:
+    if img1.shape[1] > img2.shape[1]:
         min2 = img2.shape[1]
     else:
         min2 = img1.shape[1]
 
-    toup = (min2,min1)
+    toup = (min2, min1)
 
     img1 = cv2.resize(img1, toup)
     img2 = cv2.resize(img2, toup)

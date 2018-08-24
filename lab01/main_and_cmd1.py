@@ -1,6 +1,6 @@
 from __future__ import print_function
 from histograms import otsu
-from linears import apply_mask_on_colored_image, apply_threshold
+from linears import apply_mask_on_colored_image, apply_threshold, fast_negative, fast_linear_blend
 import numpy as np
 import cv2
 
@@ -45,9 +45,36 @@ def adaptive_thresholding(img, ws, c):
 
 
 if __name__ == '__main__':
-    a = cv2.imread('../lab02/img/sonnet.jpg', cv2.IMREAD_GRAYSCALE)
-    a = adaptive_thresholding(a, 17, 10)
-    cv2.imshow('adaptive thres', a)
+
+    kind = 'linearblend'
+
+    if kind == 'adaptative':
+        print('adaptative')
+        a = cv2.imread('../lab02/img/sonnet.jpg', cv2.IMREAD_GRAYSCALE)
+        a = adaptive_thresholding(a, 17, 10)
+        cv2.imshow('adaptive thresholding', a)
+    elif kind == 'otzu':
+        print('otzu')
+        prove_con_otzu('/home/federico/PycharmProjects/hws_computer_vison/lab02/img/camera.png')
+    elif kind == 'negative':
+        print('negative')
+        a = cv2.imread('/home/federico/PycharmProjects/hws_computer_vison/lab01/img/sea.jpg', cv2.IMREAD_COLOR)
+        a = cv2.resize(a, (600, 400))
+        a = fast_negative(a, -1, 255)
+        cv2.imshow('adaptive thresholding', a)
+    elif kind == 'linearblend':
+        print('linear blend')
+        a = cv2.imread('/home/federico/PycharmProjects/hws_computer_vison/lab01/img/sea.jpg', cv2.IMREAD_COLOR)
+        a = cv2.resize(a, (600, 400))
+        b = cv2.imread('/home/federico/PycharmProjects/hws_computer_vison/lab01/img/banksy_balloon_girl.jpg',
+                       cv2.IMREAD_COLOR)
+        b = cv2.resize(b, (600, 400))
+        c = fast_linear_blend(a, b, 0.7)
+        cv2.imshow('linear blend', c)
+
+    else:
+        print('not Implemented')
+        raise Exception
 
     qu = cv2.waitKey(0)
     if qu == 'q':
