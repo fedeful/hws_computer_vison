@@ -79,3 +79,4 @@ if __name__ == '__main__':
     qu = cv2.waitKey(0)
     if qu == 'q':
         cv2.destroyAllWindows()
+    print('end')
