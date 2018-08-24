@@ -57,13 +57,30 @@ def log():
     LoG = LoG.astype(dtype=np.float64)
     LoG = cv2.filter2D(LoG, -1, lap)
     maxLoG = cv2.morphologyEx(LoG, cv2.MORPH_DILATE, np.ones((3, 3)))
-    T = 150
+    T = 60
     LoG = np.logical_and(LoG < -T, maxLoG > T) * 255
 
     cv2.imshow('log', LoG.astype(np.uint8))
     cv2.waitKey(0)
 
 
+def canny():
+    a = cv2.imread('./img/modena_skyline_03.png', cv2.IMREAD_GRAYSCALE)
+    edges = cv2.Canny(a, 100, 200)
+    cv2.imshow('canny', edges)
+    cv2.waitKey(0)
+
+
 if __name__ == '__main__':
 
-  log()
+    kind = 'canny'
+
+    if kind == 'sobel':
+        print('sobel')
+        sobel()
+    elif kind == 'log':
+        print('log')
+        log()
+    elif kind == 'canny':
+        print('canny')
+        canny()

@@ -40,4 +40,6 @@ if __name__ == '__main__':
          [0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1],
          [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1]], dtype=np.uint8)
 
-    n_labels, labels = SAUF(img)
+    cv2.imshow('prova', img * 255)
+    cv2.waitKey(0)
+    #n_labels, labels = SAUF(img)

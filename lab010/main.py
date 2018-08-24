@@ -59,5 +59,5 @@ def main(fname):
 
 if __name__ == '__main__':
     name = 'b.jpg'
-    name2 = 'Julia_Roberts.avi'
-    main2(name2)
+    name2 = 'Buffy.mp4'
+    main(name)
